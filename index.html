@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LibraryX — Book Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0f1e;
+            --surface: #0d1526;
+            --surface2: #1a2640;
+            --accent: #4f8ef7;
+            --accent2: #00d9a6;
+            --danger: #ff6b6b;
+            --text: #ffffff;
+            --muted: #8899aa;
+            --border: #1e2d4a;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            background: var(--surface);
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar h1 {
+            color: var(--accent);
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        .navbar h1 span { color: var(--accent2); }
+
+        .navbar .stats {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .navbar .stats span {
+            color: var(--accent2);
+            font-weight: bold;
+        }
+
+        /* ── Layout ── */
+        .layout {
+            display: flex;
+            height: calc(100vh - 65px);
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 220px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-title {
+            padding: 16px 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Genre Filters */
+        .genre-section {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .genre-label {
+            padding: 6px 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+        }
+
+        .genre-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 8px 20px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 13px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .genre-btn:hover { background: var(--surface2); color: var(--text); }
+
+        .genre-btn.active {
+            background: var(--surface2);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+        }
+
+        .genre-btn .count {
+            background: var(--surface2);
+            color: var(--muted);
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .genre-btn.active .count {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Alphabetical Filter */
+        .alpha-section {
+            padding: 12px 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .alpha-label {
+            padding: 6px 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+        }
+
+        .alpha-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            padding: 8px 12px;
+        }
+
+        .alpha-btn {
+            padding: 6px 4px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--muted);
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .alpha-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        .alpha-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        /* ── Main Content ── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Search and Controls Bar */
+        .controls {
+            padding: 16px 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-wrapper input:focus { border-color: var(--accent); }
+        .search-wrapper input::placeholder { color: var(--muted); }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .sort-select {
+            padding: 10px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .sort-select:focus { border-color: var(--accent); }
+
+        .add-btn {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .add-btn:hover { background: #2d6fd6; }
+
+        /* Results Info */
+        .results-info {
+            padding: 10px 24px;
+            font-size: 12px;
+            color: var(--muted);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .results-info span { color: var(--accent2); font-weight: bold; }
+
+        /* Books Grid */
+        .books-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        /* Book Card */
+        .book-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .book-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(79, 142, 247, 0.15);
+        }
+
+        .book-card .genre-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .book-card h3 {
+            font-size: 14px;
+            color: var(--text);
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .book-card .author {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .book-card .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .book-card .available {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .available.yes { background: rgba(0, 217, 166, 0.15); color: var(--accent2); }
+        .available.no { background: rgba(255, 107, 107, 0.15); color: var(--danger); }
+
+        .book-card .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-delete {
+            flex: 1;
+            padding: 6px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 6px;
+            color: var(--danger);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover { background: var(--danger); color: white; }
+
+        /* Genre tag colors */
+        .tag-novel { background: rgba(79,142,247,0.15); color: #4f8ef7; }
+        .tag-adventure { background: rgba(255,165,0,0.15); color: #ffa500; }
+        .tag-mythology { background: rgba(147,112,219,0.15); color: #9370db; }
+        .tag-horror { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+        .tag-love { background: rgba(255,105,180,0.15); color: #ff69b4; }
+        .tag-biography { background: rgba(0,217,166,0.15); color: #00d9a6; }
+        .tag-autobiography { background: rgba(255,215,0,0.15); color: #ffd700; }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Empty state */
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: var(--muted);
+        }
+
+        .empty h3 { font-size: 20px; margin-bottom: 8px; color: var(--text); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            width: 440px;
+            max-width: 90vw;
+        }
+
+        .modal h2 {
+            color: var(--accent);
+            margin-bottom: 24px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus { border-color: var(--accent); }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 12px;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--muted);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--surface); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h1>Library<span>X</span> 📚</h1>
+    <div class="stats">
+        Total Books: <span id="totalCount">0</span> &nbsp;|&nbsp;
+        Showing: <span id="showingCount">0</span>
+    </div>
+</div>
+
+<!-- Layout -->
+<div class="layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-title">Filters</div>
+
+        <!-- Genre Filter -->
+        <div class="genre-section">
+            <div class="genre-label">Genre</div>
+            <button class="genre-btn active" onclick="filterGenre('All', this)">
+                All Genres <span class="count" id="count-all">0</span>
+            </button>
+            <button class="genre-btn" onclick="filterGenre('Novel', this)">
+                📖 Novel <span class="count" id="count-novel">0</span>
+            </button>
+            <button class="genre-btn" onclick="filterGenre('Adventure', this)">
+                🗺️ Adventure <span class="count" id="count-adventure">0</span>
+            </button>
+            <button class="genre-btn" onclick="filterGenre('Mythology', this)">
+                ⚡ Mythology <span class="count" id="count-mythology">0</span>
+            </button>
+            <button class="genre-btn" onclick="filterGenre('Horror', this)">
+                👻 Horror <span class="count" id="count-horror">0</span>
+            </button>
+            <button class="genre-btn" onclick="filterGenre('Love Story', this)">
+                💕 Love Story <span class="count" id="count-love">0</span>
+            </button>
+            <button class="genre-btn" onclick="filterGenre('Biography', this)">
+                🏆 Biography <span class="count" id="count-biography">0</span>
+            </button>
+            <button class="genre-btn" onclick="filterGenre('Autobiography', this)">
+                ✍️ Autobiography <span class="count" id="count-autobiography">0</span>
+            </button>
+        </div>
+
+        <!-- Alphabetical Filter -->
+        <div class="alpha-section">
+            <div class="alpha-label">A–Z Filter</div>
+            <div class="alpha-grid" id="alphaGrid"></div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search by title or author..."
+                    oninput="handleSearch()" />
+            </div>
+            <select class="sort-select" onchange="handleSort(this.value)">
+                <option value="az">A → Z</option>
+                <option value="za">Z → A</option>
+                <option value="year">Newest First</option>
+            </select>
+            <button class="add-btn" onclick="openModal()">+ Add Book</button>
+        </div>
+
+        <!-- Results Info -->
+        <div class="results-info" id="resultsInfo">
+            Showing <span id="resultSpan">0</span> books
+        </div>
+
+        <!-- Books Grid -->
+        <div class="books-container">
+            <div id="booksGrid" class="books-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading books...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Book Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h2>📚 Add New Book</h2>
+        <div class="form-group">
+            <label>Title *</label>
+            <input type="text" id="inputTitle" placeholder="Enter book title" />
+        </div>
+        <div class="form-group">
+            <label>Author *</label>
+            <input type="text" id="inputAuthor" placeholder="Enter author name" />
+        </div>
+        <div class="form-group">
+            <label>Genre *</label>
+            <select id="inputGenre">
+                <option value="Novel">Novel</option>
+                <option value="Adventure">Adventure</option>
+                <option value="Mythology">Mythology</option>
+                <option value="Horror">Horror</option>
+                <option value="Love Story">Love Story</option>
+                <option value="Biography">Biography</option>
+                <option value="Autobiography">Autobiography</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Year</label>
+            <input type="number" id="inputYear" placeholder="Publication year" />
+        </div>
+        <div class="form-group">
+            <label>Pages</label>
+            <input type="number" id="inputPages" placeholder="Number of pages" />
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-primary" onclick="addBook()">Add Book</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── State ────────────────────────────────────────────────
+    let allBooks = [];
+    let currentGenre = 'All';
+    let currentAlpha = '';
+    let currentSearch = '';
+    let currentSort = 'az';
+
+    // ── Genre tag class map ──────────────────────────────────
+    const genreClass = {
+        'Novel': 'tag-novel',
+        'Adventure': 'tag-adventure',
+        'Mythology': 'tag-mythology',
+        'Horror': 'tag-horror',
+        'Love Story': 'tag-love',
+        'Biography': 'tag-biography',
+        'Autobiography': 'tag-autobiography'
+    };
+
+    // ── Init ─────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        buildAlphaGrid();
+        fetchBooks();
+    });
+
+    // ── Build A-Z sidebar ────────────────────────────────────
+    function buildAlphaGrid() {
+        const grid = document.getElementById('alphaGrid');
+        const letters = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        grid.innerHTML = letters.map(l => `
+            <button class="alpha-btn" onclick="filterAlpha('${l}', this)">${l}</button>
+        `).join('');
+    }
+
+    // ── Fetch all books ──────────────────────────────────────
+    async function fetchBooks() {
+        try {
+            const res = await fetch('/books');
+            const data = await res.json();
+            allBooks = data.books || [];
+            updateGenreCounts();
+            renderBooks();
+            document.getElementById('totalCount').textContent = allBooks.length;
+        } catch (err) {
+            document.getElementById('booksGrid').innerHTML =
+                '<div class="empty"><h3>⚠️ Server Error</h3><p>Make sure server is running</p></div>';
+        }
+    }
+
+    // ── Update genre counts in sidebar ──────────────────────
+    function updateGenreCounts() {
+        const counts = {};
+        allBooks.forEach(b => {
+            counts[b.genre] = (counts[b.genre] || 0) + 1;
+        });
+        document.getElementById('count-all').textContent = allBooks.length;
+        document.getElementById('count-novel').textContent = counts['Novel'] || 0;
+        document.getElementById('count-adventure').textContent = counts['Adventure'] || 0;
+        document.getElementById('count-mythology').textContent = counts['Mythology'] || 0;
+        document.getElementById('count-horror').textContent = counts['Horror'] || 0;
+        document.getElementById('count-love').textContent = counts['Love Story'] || 0;
+        document.getElementById('count-biography').textContent = counts['Biography'] || 0;
+        document.getElementById('count-autobiography').textContent = counts['Autobiography'] || 0;
+    }
+
+    // ── Render books ─────────────────────────────────────────
+    function renderBooks() {
+        let filtered = [...allBooks];
+
+        // Genre filter
+        if (currentGenre !== 'All') {
+            filtered = filtered.filter(b =>
+                b.genre.toLowerCase() === currentGenre.toLowerCase()
+            );
+        }
+
+        // Alpha filter
+        if (currentAlpha) {
+            if (currentAlpha === '#') {
+                filtered = filtered.filter(b => /^[^a-zA-Z]/.test(b.title));
+            } else {
+                filtered = filtered.filter(b =>
+                    b.title.toUpperCase().startsWith(currentAlpha)
+                );
+            }
+        }
+
+        // Search filter
+        if (currentSearch) {
+            const q = currentSearch.toLowerCase();
+            filtered = filtered.filter(b =>
+                b.title.toLowerCase().includes(q) ||
+                b.author.toLowerCase().includes(q)
+            );
+        }
+
+        // Sort
+        if (currentSort === 'az') {
+            filtered.sort((a, b) => a.title.localeCompare(b.title));
+        } else if (currentSort === 'za') {
+            filtered.sort((a, b) => b.title.localeCompare(a.title));
+        } else if (currentSort === 'year') {
+            filtered.sort((a, b) => b.year - a.year);
+        }
+
+        // Update counts
+        document.getElementById('showingCount').textContent = filtered.length;
+        document.getElementById('resultSpan').textContent = filtered.length;
+
+        const grid = document.getElementById('booksGrid');
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `
+                <div class="empty">
+                    <h3>📭 No Books Found</h3>
+                    <p>Try a different search or filter</p>
+                </div>`;
+            return;
+        }
+
+        grid.innerHTML = filtered.map(book => `
+            <div class="book-card">
+                <span class="genre-tag ${genreClass[book.genre] || ''}">${book.genre}</span>
+                <h3>${book.title}</h3>
+                <div class="author">✍️ ${book.author}</div>
+                <div class="meta">
+                    <span>📅 ${book.year}</span>
+                    <span>📄 ${book.pages} pages</span>
+                </div>
+                <span class="available ${book.available ? 'yes' : 'no'}">
+                    ${book.available ? '✅ Available' : '❌ Checked Out'}
+                </span>
+                <div class="actions">
+                    <button class="btn-delete" onclick="deleteBook(${book.id}, event)">
+                        🗑️ Remove
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ── Filter functions ─────────────────────────────────────
+    function filterGenre(genre, btn) {
+        currentGenre = genre;
+        currentAlpha = '';
+        document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.alpha-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderBooks();
+    }
+
+    function filterAlpha(letter, btn) {
+        currentAlpha = currentAlpha === letter ? '' : letter;
+        document.querySelectorAll('.alpha-btn').forEach(b => b.classList.remove('active'));
+        if (currentAlpha) btn.classList.add('active');
+        renderBooks();
+    }
+
+    function handleSearch() {
+        currentSearch = document.getElementById('searchInput').value;
+        renderBooks();
+    }
+
+    function handleSort(val) {
+        currentSort = val;
+        renderBooks();
+    }
+
+    // ── Add Book ─────────────────────────────────────────────
+    function openModal() {
+        document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+        document.getElementById('inputTitle').value = '';
+        document.getElementById('inputAuthor').value = '';
+        document.getElementById('inputYear').value = '';
+        document.getElementById('inputPages').value = '';
+    }
+
+    async function addBook() {
+        const title = document.getElementById('inputTitle').value.trim();
+        const author = document.getElementById('inputAuthor').value.trim();
+        const genre = document.getElementById('inputGenre').value;
+        const year = document.getElementById('inputYear').value;
+        const pages = document.getElementById('inputPages').value;
+
+        if (!title || !author) {
+            alert('Title and Author are required!');
+            return;
+        }
+
+        try {
+            const res = await fetch('/books', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, author, genre, year, pages })
+            });
+            const data = await res.json();
+            if (data.success) {
+                closeModal();
+                await fetchBooks();
+            } else {
+                alert(data.message || 'Error adding book');
+            }
+        } catch (err) {
+            alert('Server error. Please try again.');
+        }
+    }
+
+    // ── Delete Book ──────────────────────────────────────────
+    async function deleteBook(id, event) {
+        event.stopPropagation();
+        if (!confirm('Remove this book from library?')) return;
+
+        try {
+            const res = await fetch(`/books/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) {
+                await fetchBooks();
+            } else {
+                alert(data.message || 'Error deleting book');
+            }
+        } catch (err) {
+            alert('Server error. Please try again.');
+        }
+    }
+</script>
+</body>
+</html>
