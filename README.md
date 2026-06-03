@@ -36,8 +36,6 @@ The engineering optimization lifecycle specifically focused on and resolved crit
 ### Professional Applicability
 In modern industrial software development environments, code refactoring and performance profiling are critical operations for maintaining microservice architectures, reducing cloud hosting bills, and managing high-traffic digital applications. Optimized backends translate directly to faster load times for end-users and less processing strain on distributed server clusters. Mastering code cleanups, modular patterns, and performance metrics prepares software engineers to contribute meaningfully to large enterprise development teams and maintain scalable, production-grade cloud code infrastructure effectively.
 
-*MENTOR*: NEELA SANTOSH
-
 ##  LIVE DEPLOYMENT
 - **API Base URL:** [https://your-refactor-api.onrender.com](https://your-refactor-api.onrender.com)
 - **Deployment Platform:** Render 
